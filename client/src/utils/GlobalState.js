@@ -14,6 +14,8 @@ export const StoreProvider = ({value = [], ...props}) => {
         currentCategory: null,
     });
     
+    console.log(state);
+    
     return <Provider value={[state, dispatch]} {...props} />;  // `props` is necessary here because this Provider will wrap all other elements on the page; `props.children` will allow access to those other elements
 }
 
