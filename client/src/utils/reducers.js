@@ -8,7 +8,7 @@ import {
 import {useReducer} from 'react';
 
 
-export const reducer = (state, action) => {
+export const reducer = (state, action) => {   // this kind of 'overwriting' could be handled just as well via React `useState`s
     switch(action.type){
         case UPDATE_PRODUCTS:
             return {
