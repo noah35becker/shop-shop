@@ -12,9 +12,16 @@ export const StoreProvider = ({value = [], ...props}) => {
         products: [],
         categories: [],
         currentCategory: null,
+        cart: [],
+        cartOpen: false
     });
     
-    return <Provider value={[state, dispatch]} {...props} />;  // `props` is necessary here because this Provider will wrap all other elements on the page; `props.children` will allow access to those other elements
+    return <Provider value={[state, dispatch]} {...props} />;  // `props` is necessary here because this Provider wraps all other elements on the page in App.js; `props.children` ultimately allows access to those other elements
+    // return (    // HERE is another way to express the same return statement
+    //     <Provider value={[state, dispatch]}>
+    //         {props.children}
+    //     </Provider>
+    // );
 }
 
 export const useStoreContext = () => useContext(StoreContext);
