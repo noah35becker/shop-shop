@@ -62,8 +62,6 @@ const resolvers = {
       
       const {products} = await order.populate('products');
 
-      console.log(products);
-
       const line_items = [];  
 
       for (let i = 0; i < products.length; i++){
