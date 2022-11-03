@@ -15,6 +15,7 @@ import {useReducer} from 'react';
 
 
 export const reducer = (state, action) => {   // this kind of 'overwriting' could be handled just as well via React `useState`s
+    console.log(action);
     switch(action.type){
         case UPDATE_PRODUCTS:
             return {
@@ -40,7 +41,7 @@ export const reducer = (state, action) => {   // this kind of 'overwriting' coul
         case ADD_MULTIPLE_TO_CART:
             return {
                 ...state,
-                cartOpen: true,
+                cartOpen: action.products.length > 0,
                 cart: [...state.cart, ...action.products]
             };
         case REMOVE_FROM_CART:

@@ -2,6 +2,7 @@
 import React from "react";
 import {useStoreContext} from "../../utils/GlobalState";
 import {REMOVE_FROM_CART, UPDATE_CART_QUANTITY} from "../../utils/actions";
+import { idbPromise } from "../../utils/helpers";
 
 // COMPONENT
 export default function CartItem({item}){
@@ -12,22 +13,29 @@ export default function CartItem({item}){
             type: REMOVE_FROM_CART,
             _id: item._id
         });
+
+        idbPromise('cart', 'delete', {...item});
     }
 
     function qtyChange({target}){
         const value = +target.value;
 
-        if (value > 0)
+        if (value > 0){
             dispatch({
                 type: UPDATE_CART_QUANTITY,
                 _id: item._id,
                 purchaseQuantity: value
             });
-        else
+
+            idbPromise('cart', 'put', {...item, purchaseQuantity: value});
+        }else{
             dispatch({
                 type: REMOVE_FROM_CART,
                 _id: item._id
             });
+
+            idbPromise('cart', 'delete', {...item});
+        }
     }
 
     return (
