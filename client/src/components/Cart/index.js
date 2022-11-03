@@ -7,11 +7,17 @@ import './style.css';
 import {useStoreContext} from "../../utils/GlobalState";
 import {TOGGLE_CART, ADD_MULTIPLE_TO_CART} from "../../utils/actions";
 import { idbPromise } from "../../utils/helpers";
+import {QUERY_CHECKOUT} from '../../utils/queries';
+import {loadStripe} from '@stripe/stripe-js';
+import { useLazyQuery } from "@apollo/client";
+
+const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
 
 
 // COMPONENT
 export default function Cart(){
     const [state, dispatch] = useStoreContext();
+    const [getCheckout, {data}] = useLazyQuery(QUERY_CHECKOUT);  // `data` will contain the Stripe checkout session, but only after the query is actually called via the `getCheckout` function
 
     useEffect(
         () => {
@@ -30,6 +36,15 @@ export default function Cart(){
         }, [state.cart.length, dispatch]
     );
 
+    useEffect(
+        () => {
+            if (data)
+                stripePromise.then(response => 
+                    response.redirectToCheckout({sessionId: data.checkout.session})
+                );
+        }, [data]
+    );
+
     function toggleCart(){
         dispatch({type: TOGGLE_CART});
     }
@@ -40,6 +55,19 @@ export default function Cart(){
             sum += item.price * item.purchaseQuantity;
         });
         return sum.toFixed(2);
+    }
+
+    function submitCheckout(){
+        const productIds = [];
+
+        state.cart.forEach(item => {
+            for (let i = 0; i < item.purchaseQuantity; i++)
+                productIds.push(item._id);
+        });
+
+        getCheckout({
+            variables: {products: productIds}
+        });
     }
 
     if (state.cartOpen)
@@ -56,7 +84,7 @@ export default function Cart(){
                             <div className="flex-row space-between">
                                 <b>Total: ${calculateTotal()}</b>
                                 {Auth.loggedIn ?
-                                        <button>Checkout</button>
+                                        <button onClick={submitCheckout}>Checkout</button>
                                     :
                                         <span>(Log in to check out)</span>
                                 }
@@ -76,4 +104,4 @@ export default function Cart(){
             <span role='img' aria-label="cart">🛒</span>
         </div>
     );
-}
+};
