@@ -3,20 +3,34 @@ import { useQuery } from '@apollo/client';
 import { QUERY_CATEGORIES } from '../../utils/queries';
 import {useStoreContext} from '../../utils/GlobalState'
 import {UPDATE_CATEGORIES, UPDATE_CURRENT_CATEGORY} from '../../utils/actions';
+import {idbPromise} from '../../utils/helpers';
+
 
 function CategoryMenu() {
   const [state, dispatch] = useStoreContext();
   const {categories} = state;
-  const {data: categoryData} = useQuery(QUERY_CATEGORIES);
+  const {loading, data: categoryData} = useQuery(QUERY_CATEGORIES);
 
   useEffect(
     () => {
-      if (categoryData)
-        dispatch({
+      if (categoryData){
+        dispatch({  // store in global state object
           type: UPDATE_CATEGORIES,
           categories: categoryData.categories
         });
-    }, [categoryData, dispatch]
+
+        categoryData.categories.forEach(category => {  // store in IndexedDB
+          idbPromise('categories', 'put', category);
+        })
+      }else if (!loading){  // if `loading` is undefined, that means the GraphQL `useQuery` hook isn't working and we're probably offline
+        idbPromise('categories', 'get').then(categories => {
+          dispatch({
+            type: UPDATE_CATEGORIES,
+            categories
+          });
+        });
+      }
+    }, [categoryData, dispatch, loading]
 
   );
 

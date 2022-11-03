@@ -11,6 +11,7 @@ import {
   ADD_TO_CART,
   UPDATE_PRODUCTS
 } from '../utils/actions';
+import { idbPromise } from '../utils/helpers';
 
 
 export default function Detail() {
@@ -21,15 +22,26 @@ export default function Detail() {
   const {products} = state;
 
   useEffect(() => {
-    if (products.length)
+    if (products.length)  // if already in global store
       setCurrentProduct(products.find((product) => product._id === id));
-    else if (data){
+    else if (data){  // otherwise, once retrieved from server, add to both global store and IndexedDB
       dispatch({
         type: UPDATE_PRODUCTS,
         products: data.products
-      })
+      });
+
+      data.products.forEach(product => {
+        idbPromise('products', 'put', product);
+      });
+    }else if (!loading){  // if retrieval from server fails, use the IndexedDB cache
+      idbPromise('products', 'get').then(products => {
+        dispatch({
+          type: UPDATE_PRODUCTS,
+          products
+        })
+      });
     }
-  }, [products, id, data, dispatch]);
+  }, [products, id, data, dispatch, loading]);
 
   function addToCart(){
     const itemInCart = state.cart.find(cartItem => cartItem._id === id);

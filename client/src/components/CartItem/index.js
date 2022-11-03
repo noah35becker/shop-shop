@@ -30,23 +30,6 @@ export default function CartItem({item}){
             });
     }
 
-    const onChange = (e) => {
-        const value = e.target.value;
-      
-        if (value === '0') {
-          dispatch({
-            type: REMOVE_FROM_CART,
-            _id: item._id
-          });
-        } else {
-          dispatch({
-            type: UPDATE_CART_QUANTITY,
-            _id: item._id,
-            purchaseQuantity: parseInt(value)
-          });
-        }
-      };
-
     return (
         <div className="flex-row">
             <div>
